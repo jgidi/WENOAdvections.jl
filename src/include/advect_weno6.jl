@@ -1,20 +1,17 @@
-
 # Calculation of the combined WENO interpolant eval. at x.
 # i is the position of the node immediately at the left of x
-function weno_interpolant(f1, f2, f3, f4, f5, f6,
-                          i, x)
+function weno6_interpolant(δ, f1, f2, f3, f4, f5, f6)
 
-    # 3 interpolants
-    p = interpolants(f1, f2, f3, f4, f5, f6, i, x)
+    # Interpolants
+    p = weno6_candidates(δ, f1, f2, f3, f4, f5, f6)
 
     # weight for each interpolant
-    w = weights(f1, f2, f3, f4, f5, f6, i, x)
+    w = weno6_weights(δ, f1, f2, f3, f4, f5, f6)
 
     return sum(@. p * w)
 end
 
-function interpolants(f1, f2, f3, f4, f5, f6,
-                      i, x)
+function weno6_candidates(δ, f1, f2, f3, f4, f5, f6)
 
     # Candidate interpolants over stencils
     # S1 = {x[i-2], ..., x[i+1]},
@@ -27,30 +24,29 @@ function interpolants(f1, f2, f3, f4, f5, f6,
     # NOTE WENO order may be generalized by pre-calculating
     # interpolant shapes and weights
     p = SVector(
-        f1 + (f2 - f1) * (x - i + 3)
-        + (f3 - 2*f2 + f1) * (x - i + 3) * (x - i + 2) / 2
-        + (f4 - 3*f3 + 3*f2 - f1) * (x - i + 3) * (x - i + 2) * (x - i + 1) / 6,
+        f1 + (f2 - f1) * (δ + 3)
+        + (f3 - 2*f2 + f1) * (δ + 3) * (δ + 2) / 2
+        + (f4 - 3*f3 + 3*f2 - f1) * (δ + 3) * (δ + 2) * (δ + 1) / 6,
 
-        f2 + (f3 - f2) * (x - i + 2)
-        + (f4 - 2*f3 + f2) * (x - i + 2) * (x - i + 1) / 2
-        + (f5 - 3*f4 + 3*f3 - f2) * (x - i + 2) * (x - i + 1) * (x - i) / 6,
+        f2 + (f3 - f2) * (δ + 2)
+        + (f4 - 2*f3 + f2) * (δ + 2) * (δ + 1) / 2
+        + (f5 - 3*f4 + 3*f3 - f2) * (δ + 2) * (δ + 1) * (  δ  ) / 6,
 
-        f3 + (f4 - f3) * (x - i + 1)
-        + (f5 - 2*f4 + f3) * (x - i + 1) * (x - i) / 2
-        + (f6 - 3*f5 + 3*f4 - f3) * (x - i + 1) * (x - i) * (x - i - 1) / 6,
+        f3 + (f4 - f3) * (δ + 1)
+        + (f5 - 2*f4 + f3) * (δ + 1) * (  δ  ) / 2
+        + (f6 - 3*f5 + 3*f4 - f3) * (δ + 1) * (  δ  ) * (δ - 1) / 6,
     )
 
     return p
 end
 
-function weights(f1, f2, f3, f4, f5, f6,
-                 i, x)
+function weno6_weights(δ, f1, f2, f3, f4, f5, f6)
 
     # Ideal weights
     C = SVector(
-        (i + 1 - x) * (i + 2 - x) / 20,
-        (i + 2 - x) * (x - i + 3) / 10,
-        (x - i + 3) * (x - i + 2) / 20,
+        (1 - δ) * (2 - δ) / 20,
+        (2 - δ) * (3 + δ) / 10,
+        (3 + δ) * (2 + δ) / 20,
     )
 
     # Smoothness indicators. Their general form is shown on Eq. (7)
@@ -91,61 +87,29 @@ where `f` is sampled.
 function advect_weno6(f, dx, shift)
     N = length(f)
 
-    # Normalize shift and index-shift
-    normshift = shift/dx + 1
-    fnormshift = floor(Int64, normshift)
+    xs = shift/dx + 1     # Shifted, normalized position
+    xn = floor(Int64, xs) # Number of the first node to the left of xs
+    δ = xn - xs           # Position of the reference node relative to xs
 
-    ff = circshift(f, fnormshift)
+    # Prepare a shifted copy of f such that fs[i] = f[mod1(i-xn, N)]
+    fs = circshift(f, xn)
+
     advected = similar(f)
-    for i in 3:(N-3)
-        xs = i - normshift      # Normalized and shifted position
-        xl = i - fnormshift     # Position of the left node from xs
-        advected[i] = weno_interpolant(ff[i-2], ff[i-1], ff[i],
-                                       ff[i+1], ff[i+2], ff[i+3],
-                                       xl, xs)
+    Threads.@threads for i in 3:(N-3)
+        advected[i] = weno6_interpolant(δ, fs[i-2], fs[i-1], fs[i], fs[i+1], fs[i+2], fs[i+3])
     end
 
     ############ Periodic BC's
     # i = 1
-    advected[1] = weno_interpolant(ff[N-1], ff[N], ff[1], ff[2], ff[3], ff[4],
-                                   1-fnormshift, 1-normshift)
+    advected[ 1 ] = weno6_interpolant(δ, fs[N-1], fs[ N ], fs[ 1 ], fs[ 2 ], fs[ 3 ], fs[ 4 ])
     # i = 2
-    advected[2] = weno_interpolant(ff[N], ff[1], ff[2], ff[4], ff[4], ff[5],
-                                   2-fnormshift, 2-normshift)
+    advected[ 2 ] = weno6_interpolant(δ, fs[ N ], fs[ 1 ], fs[ 2 ], fs[ 4 ], fs[ 4 ], fs[ 5 ])
     # i = N-2
-    advected[N-2] = weno_interpolant(ff[N-4], ff[N-3], ff[N-2], ff[N-1], ff[N], ff[1],
-                                     N-2-fnormshift, N-2-normshift)
+    advected[N-2] = weno6_interpolant(δ, fs[N-4], fs[N-3], fs[N-2], fs[N-1], fs[ N ], fs[ 1 ])
     # i = N-1
-    advected[N-1] = weno_interpolant(ff[N-3], ff[N-2], ff[N-1], ff[N], ff[1], ff[2],
-                                     N-1-fnormshift, N-1-normshift)
+    advected[N-1] = weno6_interpolant(δ, fs[N-3], fs[N-2], fs[N-1], fs[ N ], fs[ 1 ], fs[ 2 ])
     # i = N
-    advected[N] = weno_interpolant(ff[N-2], ff[N-1], ff[N], ff[1], ff[2], ff[3],
-                                   N-fnormshift, N-normshift)
+    advected[ N ] = weno6_interpolant(δ, fs[N-2], fs[N-1], fs[ N ], fs[ 1 ], fs[ 2 ], fs[ 3 ])
 
     return advected
 end
-
-# # This version looks simpler but is slower because of the mod1
-# function advect_weno6(f, dx, shift)
-#     N = length(f)
-
-#     # Normalize shift and node positions
-#     normshift = shift/dx + 1
-#     fnormshift = floor(Int64, normshift)
-
-#     advected = similar(f)
-#     for i in 1:N
-#         xs = i - normshift  # x normalized and shifted
-#         j  = i - fnormshift # Position of the left node from xs
-
-#         indices = SVector(j-2, j-1, j, j+1, j+2, j+3)
-
-#         # Periodic BC's
-#         indices = mod1.(indices, N)
-
-#         f1, f2, f3, f4, f5, f6 = @views f[indices]
-#         advected[i] = weno_interpolant(f1, f2, f3, f4, f5, f6, j, xs)
-#     end
-
-#     return advected
-# end
