@@ -103,7 +103,7 @@ function advect_weno6(f::Vector{Float64}, dx::Real, shift::Real)
     # i = 1
     advected[ 1 ] = weno6_interpolant(δ, fs[N-1], fs[ N ], fs[ 1 ], fs[ 2 ], fs[ 3 ], fs[ 4 ])
     # i = 2
-    advected[ 2 ] = weno6_interpolant(δ, fs[ N ], fs[ 1 ], fs[ 2 ], fs[ 4 ], fs[ 4 ], fs[ 5 ])
+    advected[ 2 ] = weno6_interpolant(δ, fs[ N ], fs[ 1 ], fs[ 2 ], fs[ 3 ], fs[ 4 ], fs[ 5 ])
     # i = N-2
     advected[N-2] = weno6_interpolant(δ, fs[N-4], fs[N-3], fs[N-2], fs[N-1], fs[ N ], fs[ 1 ])
     # i = N-1
