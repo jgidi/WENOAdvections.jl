@@ -14,12 +14,10 @@ end
 function weno6_candidates(δ, f1, f2, f3, f4, f5, f6)
 
     # Candidate interpolants over stencils
-    # S1 = {x[i-2], ..., x[i+1]},
-    # S2 = {x[i-1], ..., x[i+2]}, and
-    # S3 = {x[i], ..., x[i+3]},
+    # S1 = {x1, ..., x4},
+    # S2 = {x2, ..., x5}, and
+    # S3 = {x3, ..., x6},
     # respectively
-
-    # The evaluation is done for x ∈ [x3, x4]
 
     # NOTE WENO order may be generalized by pre-calculating
     # interpolant shapes and weights
