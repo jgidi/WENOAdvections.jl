@@ -20,7 +20,7 @@ f = float(@. abs(x) < 0.5 ) * ones(Nv)'
 
 # Shift
 shiftx = 2v
-shiftv = @. x^2
+# shiftv = @. x^2
 
 # Make advection
 fadv = WENOAdvection.advect_weno6_2d(f, dx, shiftx, dim=1);
