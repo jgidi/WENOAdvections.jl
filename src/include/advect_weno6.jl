@@ -127,8 +127,8 @@ function advect_weno6_2d(f::Matrix{Float64}, dx::Real, shift::AbstractVector;
     F = PermutedDimsArray(f,   (dim, other_dim)) # Transposed view
 
     # Perform 1d advections
-    for i in axes(f, other_dim)
-        A[:, i] = advect_weno6(F[:, i], dx, shift[i])
+    @sync for i in axes(f, other_dim)
+        Threads.@spawn A[:, i] = advect_weno6(F[:, i], dx, shift[i])
     end
 
     return adv
