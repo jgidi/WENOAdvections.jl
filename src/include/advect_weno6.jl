@@ -75,7 +75,7 @@ function weno6_weights(δ, f1, f2, f3, f4, f5, f6)
 end
 
 """
-    advect_weno6(f, dx, shift)
+    advect_weno6(f::Vector{Float64}, dx::Float64, shift::Real)
 
 Perform a 6th-order WENO reconstruction to advect the values of
 the 1-dimensional array `f` according to a shifting `shift` on space.
@@ -84,7 +84,7 @@ Note that `dx` is the (constant) step used to sample the space points
 where `f` is sampled.
 
 """
-function advect_weno6(f, dx, shift)
+function advect_weno6(f::Vector{Float64}, dx::Real, shift::Real)
     N = length(f)
 
     xs = shift/dx + 1     # Shifted, normalized position
@@ -103,7 +103,7 @@ function advect_weno6(f, dx, shift)
     # i = 1
     advected[ 1 ] = weno6_interpolant(δ, fs[N-1], fs[ N ], fs[ 1 ], fs[ 2 ], fs[ 3 ], fs[ 4 ])
     # i = 2
-    advected[ 2 ] = weno6_interpolant(δ, fs[ N ], fs[ 1 ], fs[ 2 ], fs[ 4 ], fs[ 4 ], fs[ 5 ])
+    advected[ 2 ] = weno6_interpolant(δ, fs[ N ], fs[ 1 ], fs[ 2 ], fs[ 3 ], fs[ 4 ], fs[ 5 ])
     # i = N-2
     advected[N-2] = weno6_interpolant(δ, fs[N-4], fs[N-3], fs[N-2], fs[N-1], fs[ N ], fs[ 1 ])
     # i = N-1
@@ -112,4 +112,26 @@ function advect_weno6(f, dx, shift)
     advected[ N ] = weno6_interpolant(δ, fs[N-2], fs[N-1], fs[ N ], fs[ 1 ], fs[ 2 ], fs[ 3 ])
 
     return advected
+end
+
+function advect_weno6_2d(f::Matrix{Float64}, dx::Real, shift::AbstractVector;
+                         dim = 1)
+    # For dim ∈ {1, 2}
+    other_dim = 3-dim
+
+    # Checks
+    @assert dim<3 "The value of 'dim' must be 0 or 1. You entered $dim."
+    @assert length(shift)==size(f, other_dim) "The shift should have the sane number of elements as the non-advected dimension."
+
+    # Preallocate arrays and views
+    adv = similar(f)
+    A = PermutedDimsArray(adv, (dim, other_dim)) # Transposed view
+    F = PermutedDimsArray(f,   (dim, other_dim)) # Transposed view
+
+    # Perform 1d advections
+    for i in axes(f, other_dim)
+        A[:, i] = advect_weno6(F[:, i], dx, shift[i])
+    end
+
+    return adv
 end

@@ -17,16 +17,19 @@ v = range(vmin, vmax, length=Nv)
 # Discontinuous step function
 f = float(@. abs(v) < 0.5 )
 
-shift = -3.7
+shift = 3.65
 
+# Make advection
 fadv = advect_weno6(f, dv, shift);
 
 # Make a plot with both initial and shifted functions
-using PyPlot
+using Plots
 
-plot(v, f,    color = "red",  linewidth=1,   label="\$ f(v) \$")
-plot(v, fadv, color = "blue", linewidth=0.5, label="\$ f(v - s) \$")
-legend(loc="best")
-title("s = $shift")
+p = plot(legend = :false,
+         box = :false
+         )
 
-show()
+plot!(p, v, f,    label = "\$ f(v)   \$")
+plot!(p, v, fadv, label = "\$ f(v-s) \$", l = (:red, 0.5))
+
+display(p)
