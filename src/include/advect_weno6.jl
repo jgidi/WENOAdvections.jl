@@ -113,3 +113,25 @@ function advect_weno6(f::Vector{Float64}, dx::Real, shift::Real)
 
     return advected
 end
+
+function advect_weno6_2d(f::Matrix{Float64}, dx::Real, shift::AbstractVector;
+                         dim = 1)
+    # For dim ∈ {1, 2}
+    other_dim = 3-dim
+
+    # Checks
+    @assert dim<3 "The value of 'dim' must be 0 or 1. You entered $dim."
+    @assert length(shift)==size(f, other_dim) "The shift should have the sane number of elements as the non-advected dimension."
+
+    # Preallocate arrays and views
+    adv = similar(f)
+    A = PermutedDimsArray(adv, (dim, other_dim)) # Transposed view
+    F = PermutedDimsArray(f,   (dim, other_dim)) # Transposed view
+
+    # Perform 1d advections
+    for i in axes(f, other_dim)
+        A[:, i] = advect_weno6(F[:, i], dx, shift[i])
+    end
+
+    return adv
+end

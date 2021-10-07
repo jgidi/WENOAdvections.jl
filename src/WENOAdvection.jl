@@ -8,7 +8,7 @@ module WENOAdvection
 using StaticArrays, LinearAlgebra
 
 # Exported functions
-export advect_weno6
+export advect_weno6, advect_weno6_2d
 
 include("include/advect_weno6.jl")
 
