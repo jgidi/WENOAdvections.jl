@@ -80,7 +80,7 @@ Note that `dx` is the (constant) step used to sample the space points
 where `f` is sampled.
 
 """
-function advect_weno6(f::Vector{Float64}, dx::Real, shift::Real)
+function advect_weno6(f::AbstractVector, dx::Real, shift::Real)
     N = length(f)
 
     xs = shift/dx + 1     # Shifted, normalized position
@@ -89,7 +89,7 @@ function advect_weno6(f::Vector{Float64}, dx::Real, shift::Real)
 
     # Prepare a shifted copy of f such that fs[i] = f[mod1(i-xn, N)]
     fs = circshift(f, xn)
-
+    
     advected = similar(f)
     @tturbo for i in 3:(N-3)
         advected[i] = weno6_interpolant(δ, fs[i-2], fs[i-1], fs[i], fs[i+1], fs[i+2], fs[i+3])
@@ -110,7 +110,7 @@ function advect_weno6(f::Vector{Float64}, dx::Real, shift::Real)
     return advected
 end
 
-function advect_weno6_2d(f::Matrix{Float64}, dx::Real, shift::AbstractVector;
+function advect_weno6_2d(f::AbstractMatrix{Float64}, dx::Real, shift::AbstractVector;
                          dim = 1)
     # For dim ∈ {1, 2}
     other_dim = 3-dim
