@@ -5,7 +5,6 @@
 module WENOAdvection
 
 # External dependencies
-using StaticArrays, LinearAlgebra
 
 # Exported functions
 export advect_weno6, advect_weno6_2d

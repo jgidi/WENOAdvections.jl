@@ -21,7 +21,7 @@ function weno6_candidates(δ, f1, f2, f3, f4, f5, f6)
 
     # NOTE WENO order may be generalized by pre-calculating
     # interpolant shapes and weights
-    p = SVector(
+    p = @fastmath (
         f1 + (f2 - f1) * (δ + 3)
         + (f3 - 2*f2 + f1) * (δ + 3) * (δ + 2) / 2
         + (f4 - 3*f3 + 3*f2 - f1) * (δ + 3) * (δ + 2) * (δ + 1) / 6,
@@ -41,15 +41,15 @@ end
 function weno6_weights(δ, f1, f2, f3, f4, f5, f6)
 
     # Ideal weights
-    C = SVector(
         (1 - δ) * (2 - δ) / 20,
         (2 - δ) * (3 + δ) / 10,
         (3 + δ) * (2 + δ) / 20,
+    C = @fastmath (
     )
 
     # Smoothness indicators. Their general form is shown on Eq. (7)
-    S = SVector(
         (814*f4^2 + 4326*f3^2 + 2976*f2^2 + 244*f1^2
+    S = @fastmath (
          - 3579*f3*f4 - 6927*f3*f2 + 1854*f3*f1
          + 2634*f4*f2 -  683*f4*f1 - 1659*f2*f1 ) / 180,
 
@@ -64,10 +64,10 @@ function weno6_weights(δ, f1, f2, f3, f4, f5, f6)
 
     # Smoothness-corrected, nonlinear weights
     # eps() to avoid divission by zero
-    α = @. C / (eps() + S)^2
+    α = @fastmath @. C / (eps() + S)^2
 
     # Normalization
-    α = α / sum(α)
+    α = @fastmath α ./ sum(α)
 
     return α
 end
