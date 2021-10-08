@@ -19,8 +19,6 @@ function weno6_candidates(δ, f1, f2, f3, f4, f5, f6)
     # S3 = {x3, ..., x6},
     # respectively
 
-    # NOTE WENO order may be generalized by pre-calculating
-    # interpolant shapes and weights
     p = @fastmath (
         f1 + (f2 - f1) * (δ + 3)
         + 0.5 * (f3 - 2*f2 + f1) * (δ + 3) * (δ + 2)
