@@ -5,6 +5,7 @@
 module WENOAdvection
 
 # External dependencies
+using LoopVectorization         # Fast loops
 
 # Exported functions
 export advect_weno6, advect_weno6_2d

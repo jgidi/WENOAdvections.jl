@@ -93,10 +93,10 @@ function advect_weno6(f::Vector{Float64}, dx::Real, shift::Real)
     fs = circshift(f, xn)
 
     advected = similar(f)
-    Threads.@threads for i in 3:(N-3)
+    @tturbo for i in 3:(N-3)
         advected[i] = weno6_interpolant(δ, fs[i-2], fs[i-1], fs[i], fs[i+1], fs[i+2], fs[i+3])
     end
-
+    
     ############ Periodic BC's
     # i = N-2
     advected[N-2] = weno6_interpolant(δ, fs[N-4], fs[N-3], fs[N-2], fs[N-1], fs[ N ], fs[ 1 ])
