@@ -6,6 +6,7 @@ module WENOAdvection
 
 # External dependencies
 using LoopVectorization         # Fast loops
+using Polyester                 # Cheap threads
 
 # Exported functions
 export advect_weno6, advect_weno6_2d
