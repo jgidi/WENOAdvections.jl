@@ -1,4 +1,4 @@
-name = "WENOAdvection"
+name = "WENOAdvections"
 uuid = "82faa473-4b87-41d5-9119-6bf181cc711f"
 authors = ["Jorge Gidi <jorgegidi@gmail.com>"]
 version = "0.1.0"

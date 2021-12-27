@@ -2,7 +2,7 @@
 # 'Level set equations on surfaces via de Closest Point Method' (2008),
 # by Colin Macdonald & Steven Ruuth
 
-module WENOAdvection
+module WENOAdvections
 
 # External dependencies
 using LoopVectorization         # Fast loops

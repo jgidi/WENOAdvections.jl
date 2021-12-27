@@ -1,4 +1,4 @@
-using WENOAdvection
+using WENOAdvections
 
 # Construct uniform space
 Nx, Nv = 64, 128
@@ -23,8 +23,8 @@ shiftx = 2v
 # shiftv = @. x^2
 
 # Make advection
-fadv = WENOAdvection.advect_weno6_2d(f, dx, shiftx, dim=1);
-# fadv = WENOAdvection.advect_weno6_2d(f, dv, shiftv, dim=2);
+fadv = WENOAdvections.advect_weno6_2d(f, dx, shiftx, dim=1);
+# fadv = WENOAdvections.advect_weno6_2d(f, dv, shiftv, dim=2);
 
 using Plots
 

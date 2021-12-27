@@ -1,4 +1,4 @@
-using WENOAdvection
+using WENOAdvections
 
 # Construct uniform space
 Nv = 128

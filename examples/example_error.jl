@@ -1,4 +1,4 @@
-using WENOAdvection
+using WENOAdvections
 
 # Test function
 f(x) = @. exp(-0.5*(x/0.1)^2) + sin(x)^2 #+ float(-pi/2 < x < pi/2)
