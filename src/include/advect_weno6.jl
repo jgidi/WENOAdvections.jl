@@ -1,5 +1,4 @@
-# Calculation of the combined WENO interpolant eval. at x.
-# i is the position of the node immediately at the left of x
+# Calculation of the combined WENO interpolant evaluated at x.
 function weno6_interpolant(δ, f1, f2, f3, f4, f5, f6)
 
     # Interpolants
@@ -71,12 +70,12 @@ function weno6_weights(δ, f1, f2, f3, f4, f5, f6)
 end
 
 """
-    advect_weno6(f::Vector{Float64}, dx::Float64, shift::Real)
+    advect_weno6(f::AbstractVector, dx::Real, shift::Real)
 
 Perform a 6th-order WENO reconstruction to advect the values of
 the 1-dimensional array `f` according to a shifting `shift` on space.
 
-Note that `dx` is the (constant) step used to sample the space points
+Note that `dx` is the (constant) step used to discretize the space points
 where `f` is sampled.
 
 """

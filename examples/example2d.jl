@@ -1,4 +1,4 @@
-using WENOAdvection
+using WENOAdvections
 
 # Construct uniform space
 Nx, Nv = 64, 128
@@ -23,16 +23,25 @@ shiftx = 2v
 # shiftv = @. x^2
 
 # Make advection
-fadv = WENOAdvection.advect_weno6_2d(f, dx, shiftx, dim=1);
-# fadv = WENOAdvection.advect_weno6_2d(f, dv, shiftv, dim=2);
+fadv = WENOAdvections.advect_weno6_2d(f, dx, shiftx, dim=1);
+# fadv = WENOAdvections.advect_weno6_2d(f, dv, shiftv, dim=2);
 
+
+# Make plot of te original and WENO-shifted function
 using Plots
 
-p = plot(xlabel = "\$ x \$",
+p1 = heatmap(x, v, f', title = "\$ f(x, v) \$")
+p2 = heatmap(x, v, fadv', title = "\$ f(x-2v, v) \$")
+# p2 = heatmap(x, v, fadv', title = "\$ f(x, v-x^2) \$")
+
+p = plot(p1, p2,
+         xlabel = "\$ x \$",
          ylabel = "\$ v \$",
+         dpi = 300,
          )
 
-p1 = heatmap(p, x, v, f', title = "\$ f(x, v) \$")
-p2 = heatmap(p, x, v, fadv', title = "\$ f(x-2v, v) \$")
+# Save plot
+savefig(p, "example2d.png")
 
-display(plot(p1, p2))
+# Show plot
+display(p)

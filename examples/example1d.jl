@@ -1,4 +1,4 @@
-using WENOAdvection
+using WENOAdvections
 
 # Construct uniform space
 Nv = 128
@@ -25,11 +25,18 @@ fadv = advect_weno6(f, dv, shift);
 # Make a plot with both initial and shifted functions
 using Plots
 
-p = plot(legend = :false,
-         box = :false
-         )
+p = plot(
+    framestyle = :box,
+    legend = :false,
+    box = :false,
+    xlabel = "\$ v \$"
+)
 
-plot!(p, v, f,    label = "\$ f(v)   \$")
-plot!(p, v, fadv, label = "\$ f(v-s) \$", l = (:red, 0.5))
+plot!(p, v, f,    label = "\$ f(v)   \$", l = (:blue, 2))
+plot!(p, v, fadv, label = "\$ f(v-s) \$", l = (:red, 1.5))
 
+# Save plot
+savefig(p, "example1d.png")
+
+# Show plot
 display(p)
